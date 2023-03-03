@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.qf.dao.TimeTemplateDao">
+
+    <resultMap id="select" type="TimeTemplate">
+        <id property="timeTemplateId" column="timeTemplateId"/>
+        <result property="templateName" column="templateName"/>
+        <result property="templateBelong" column="templateBelong"/>
+        <result property="amTime" column="amTime"/>
+        <result property="amStart" column="amStart"/>
+        <result property="amStop" column="amStop"/>
+        <result property="pmTime" column="pmTime"/>
+        <result property="pmStart" column="pmStart"/>
+        <result property="pmStop" column="pmStop"/>
+        <result property="useful" column="useful"/>
+        <result property="pinyinCode" column="pinyinCode"/>
+        <association property="organ" javaType="Organ">
+            <id property="organId" column="organId"/>
+            <result property="organName" column="organName"/>
+        </association>
+        <association property="dept" javaType="Dept">
+            <id property="deptNo" column="deptNo"/>
+            <result property="deptName" column="deptName"/>
+        </association>
+        <association property="doctor" javaType="Doctor">
+            <id property="dId" column="dId"/>
+            <result property="dName" column="dName"/>
+        </association>
+    </resultMap>
+
+    <select id="selectAll" resultMap="select">
+        select timetemplateid,
+               templatename,
+               templatebelong,
+               amtime,
+               amstart,
+               amstop,
+               pmtime,
+               pmstart,
+               pmstop,
+               o.organid,
+               o.organName,
+               d.deptno,
+               d.deptName,
+               d2.did,
+               d2.dname,
+               useful,
+               pinyincode
+        from timetemplate
+                 left join organ o on o.organId = timetemplate.organid
+                 left join dept d on d.deptNo = timetemplate.deptno
+                 left join doctor d2 on d2.did = timetemplate.did
+    </select>
+
+    <insert id="insert" parameterType="TimeTemplate">
+        <selectKey keyProperty="timeTemplateId" resultType="Integer" order="AFTER">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        insert into timetemplate
+        (templatename, templatebelong, amtime, amstart, amstop, pmtime, pmstart, pmstop, organid, deptno, did, useful,
+        pinyincode)
+        values (#{templateName}, #{templateBelong}, #{amTime}, #{amStart}, #{amStop}, #{pmTime}, #{pmStart}, #{pmStop},
+        #{organ.organId}, #{dept.deptNo}, #{doctor.dId}, #{useful}, #{pinyinCode})
+    </insert>
+
+    <update id="update" parameterType="TimeTemplate">
+        update timetemplate
+        set templatename   = #{templateName},
+            templateBelong = #{templateBelong},
+            amtime         = #{amTime},
+            amStart        = #{amStart},
+            amStop         = #{amStop},
+            pmTime         = #{pmTime},
+            pmStart        = #{pmStart},
+            pmStop         = #{pmStop},
+            organid        = #{organ.organId},
+            deptno         = #{dept.deptNo},
+            did            = #{doctor.dId},
+            useful         = #{useful},
+            pinyinCode     = #{pinyinCode}
+        where timeTemplateid = #{timeTemplateId}
+    </update>
+
+    <select id="selectByKey" resultMap="select" parameterType="TimeTemplate">
+        select timetemplateid,
+        templatename,
+        templatebelong,
+        amtime,
+        amstart,
+        amstop,
+        pmtime,
+        pmstart,
+        pmstop,
+        o.organid,
+        o.organName,
+        d.deptno,
+        d.deptName,
+        d2.did,
+        d2.dname,
+        useful,
+        pinyincode
+        from timetemplate
+        left join organ o on o.organId = timetemplate.organid
+        left join dept d on d.deptNo = timetemplate.deptno
+        left join doctor d2 on d2.did = timetemplate.did
+        <where>
+            templatename like concat('%',#{templateName},'%')
+            <if test="templateBelong != null and templateBelong != ''">
+                and templatebelong = #{templateBelong}
+            </if>
+            <if test="useful != null">
+                and useful = #{useful}
+            </if>
+            <if test="organ.organId != null">
+                and o.organid = #{organ.organId}
+            </if>
+            <if test="dept.deptNo != null">
+                and d.deptno = #{dept.deptNo}
+            </if>
+            <if test="doctor.dId != null">
+                and d2.did = #{doctor.dId}
+            </if>
+        </where>
+    </select>
+
+    <delete id="delete">
+        delete from timetemplate where timetemplateid in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="selectByScheduling" resultMap="select" parameterType="Scheduling">
+        select timetemplateid,
+        templatename,
+        templatebelong,
+        amtime,
+        amstart,
+        amstop,
+        pmtime,
+        pmstart,
+        pmstop,
+        o.organid,
+        o.organName,
+        d.deptno,
+        d.deptName,
+        d2.did,
+        d2.dname,
+        useful,
+        pinyincode
+        from timetemplate
+        left join organ o on o.organId = timetemplate.organid
+        left join dept d on d.deptNo = timetemplate.deptno
+        left join doctor d2 on d2.did = timetemplate.did
+        <where>
+            <if test="scheduling.organ.organId != null">
+                o.organid = #{scheduling.organ.organId}
+            </if>
+            <if test="scheduling.dept.deptNo != null">
+                and d.deptno = #{scheduling.dept.deptNo}
+            </if>
+            <if test="scheduling.doctor.dId != null">
+                and d2.did = #{scheduling.doctor.dId}
+            </if>
+            <if test="belong != null">
+                and templatebelong = #{belong}
+            </if>
+            <if test="useful != null">
+                and useful = #{useful}
+            </if>
+        </where>
+    </select>
+
+</mapper>

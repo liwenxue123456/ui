@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.qf.dao.TimeSlotDao">
+
+    <select id="selectByParentId" resultType="TimeSlot">
+        select timeslotid,
+               templateid,
+               classes,
+               timeslotcode,
+               start,
+               end,
+               takenumstart,
+               takenumend,
+               pjkbsc,
+               sjdhys
+        from timeslot
+        where templateid = #{id}
+    </select>
+
+    <insert id="insert" parameterType="TimeSlot">
+        insert into timeslot (templateid, classes, timeslotcode, start, end, takenumstart, takenumend, pjkbsc, sjdhys)
+        values (#{templateId}, #{classes}, #{timeSlotCode}, #{start}, #{end}, #{takeNumStart}, #{takeNumEnd}, #{pjkbsc},
+                #{sjdhys})
+    </insert>
+
+    <update id="update" parameterType="TimeSlot">
+        update timeslot
+        set classes=#{classes},
+            timeslotcode=#{timeSlotCode},
+            start=#{start},
+            end=#{end},
+            takenumstart=#{takeNumStart},
+            takenumend=#{takeNumEnd},
+            pjkbsc=#{pjkbsc},
+            sjdhys=#{sjdhys}
+        where timeslotid = #{timeSlotId}
+    </update>
+
+    <delete id="delete">
+        delete
+        from timeslot
+        where timeslotid = #{id}
+    </delete>
+
+    <select id="selectByClasses" resultType="TimeSlot">
+        select timeslotid,
+               templateid,
+               classes,
+               timeslotcode,
+               start,
+               end,
+               takenumstart,
+               takenumend,
+               pjkbsc,
+               sjdhys
+        from timeslot
+        where templateid = #{id}
+          and classes = #{classes}
+    </select>
+
+</mapper>

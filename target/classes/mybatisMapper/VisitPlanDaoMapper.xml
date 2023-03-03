@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.qf.dao.VisitPlanDao">
+
+    <resultMap id="select" type="VisitPlan">
+        <id property="visitPlanId" column="visitPlanId"/>
+        <result property="planStatus" column="planStatus"/>
+        <result property="schedulingType" column="schedulingType"/>
+        <result property="numClass" column="numClass"/>
+        <result property="numType" column="numType"/>
+        <result property="numWindow" column="numWindow"/>
+        <result property="visitDate" column="visitDate"/>
+        <result property="holiday" column="holiday"/>
+        <result property="week" column="week"/>
+        <result property="classes" column="classes"/>
+        <result property="timeCode" column="timeCode"/>
+        <result property="sjdhys" column="sjdhys"/>
+        <result property="addNumAble" column="addNumAble"/>
+        <result property="surplusNum" column="surplusNum"/>
+        <association property="organ" javaType="Organ">
+            <id property="organId" column="organId"/>
+            <result property="organName" column="organName"/>
+        </association>
+        <association property="dept" javaType="Dept">
+            <id property="deptNo" column="deptNo"/>
+            <result property="deptName" column="deptName"/>
+        </association>
+        <association property="doctor" javaType="Doctor">
+            <id property="dId" column="dId"/>
+            <result property="dName" column="dName"/>
+        </association>
+    </resultMap>
+
+    <select id="selectAll" resultMap="select">
+        select visitplanid,
+               planstatus,
+               schedulingtype,
+               o.organid,
+               o.organname,
+               d.deptno,
+               d.deptname,
+               d2.did,
+               d2.dname,
+               numclass,
+               numtype,
+               numwindow,
+               visitdate,
+               holiday,
+               week,
+               classes,
+               timecode,
+               sjdhys,
+               addnumable,
+               surplusnum
+        from visitplan
+                 left join organ o on o.organId = visitplan.organid
+                 left join dept d on d.deptNo = visitplan.deptno
+                 left join doctor d2 on d2.did = visitplan.did
+    </select>
+
+    <select id="selectByKey" resultMap="select">
+        select visitplanid,
+        planstatus,
+        schedulingtype,
+        o.organid,
+        o.organname,
+        d.deptno,
+        d.deptname,
+        d2.did,
+        d2.dname,
+        numclass,
+        numtype,
+        numwindow,
+        visitdate,
+        holiday,
+        week,
+        classes,
+        timecode,
+        sjdhys,
+        addnumable,
+        surplusnum
+        from visitplan
+        left join organ o on o.organId = visitplan.organid
+        left join dept d on d.deptNo = visitplan.deptno
+        left join doctor d2 on d2.did = visitplan.did
+        <where>
+            <if test="schedulingType != null and schedulingType != ''">
+                schedulingtype = #{schedulingType}
+            </if>
+            <if test="organId != null and organId != ''">
+                and o.organid = #{organId}
+            </if>
+            <if test="deptNo != null and deptNo != ''">
+                and d.deptno = #{deptNo}
+            </if>
+            <if test="dId != null and dId != ''">
+                and d2.did = #{dId}
+            </if>
+            <if test="start != null and start != '' and end != null and end != ''">
+                and visitdate between #{start} and #{end}
+            </if>
+            <if test="planStatus != null and planStatus != ''">
+                and planstatus = #{planStatus}
+            </if>
+            <if test="numClass != null and numClass != ''">
+                and numclass = #{numClass}
+            </if>
+            <if test='isHoliday == "是"'>
+                and holiday != "" and !isnull(holiday)
+            </if>
+            <if test='isHoliday == "否"'>
+                and holiday = "" or isnull(holiday)
+            </if>
+            <if test="week != null and week != ''">
+                and week = #{week}
+            </if>
+            <if test="classes != null and classes != ''">
+                and classes = #{classes}
+            </if>
+        </where>
+    </select>
+
+    <update id="updateStatus">
+        update visitplan
+        set planstatus = #{planStatus}
+        where visitplanid in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </update>
+
+    <update id="updateNum">
+        update visitplan
+        set surplusnum = #{surplusNum},
+            sjdhys     = #{sjdhys},
+            addnumable = #{addNumAble}
+        where visitplanid = #{id}
+    </update>
+
+</mapper>

@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.qf.dao.SchedulingDao">
+
+    <resultMap id="select" type="Scheduling">
+        <id property="schedulingId" column="schedulingId"/>
+        <result property="schedulingType" column="schedulingType"/>
+        <result property="numClass" column="numClass"/>
+        <result property="numType" column="numType"/>
+        <result property="week" column="week"/>
+        <result property="classes" column="classes"/>
+        <result property="timeCode" column="timeCode"/>
+        <result property="sjdhys" column="sjdhys"/>
+        <result property="addNumAble" column="addNumAble"/>
+        <result property="isHoliday" column="isHoliday"/>
+        <result property="numWindow" column="numWindow"/>
+        <result property="useful" column="useful"/>
+        <result property="timeTemplateId" column="timeTemplateId"/>
+        <association property="organ" javaType="Organ">
+            <id property="organId" column="organId"/>
+            <result property="organName" column="organName"/>
+        </association>
+        <association property="dept" javaType="Dept">
+            <id property="deptNo" column="deptNo"/>
+            <result property="deptName" column="deptName"/>
+        </association>
+        <association property="doctor" javaType="Doctor">
+            <id property="dId" column="dId"/>
+            <result property="dName" column="dName"/>
+        </association>
+    </resultMap>
+
+    <select id="selectAll" resultMap="select">
+        select schedulingid,
+               schedulingtype,
+               o.organid,
+               o.organName,
+               d.deptno,
+               d.deptName,
+               d2.did,
+               d2.dname,
+               numclass,
+               numtype,
+               week,
+               classes,
+               timecode,
+               sjdhys,
+               addnumable,
+               isholiday,
+               numwindow,
+               useful,
+               timetemplateid
+        from scheduling
+                 left join organ o on o.organId = scheduling.organid
+                 left join dept d on d.deptNo = scheduling.deptno
+                 left join doctor d2 on d2.did = scheduling.did
+    </select>
+
+    <select id="selectByKey" resultMap="select" parameterType="Scheduling">
+        select schedulingid,
+        schedulingtype,
+        o.organid,
+        o.organName,
+        d.deptno,
+        d.deptName,
+        d2.did,
+        d2.dname,
+        numclass,
+        numtype,
+        week,
+        classes,
+        timecode,
+        sjdhys,
+        addnumable,
+        isholiday,
+        numwindow,
+        useful,
+        timetemplateid
+        from scheduling
+        left join organ o on o.organId = scheduling.organid
+        left join dept d on d.deptNo = scheduling.deptno
+        left join doctor d2 on d2.did = scheduling.did
+        <where>
+            <if test="organ.organId != null and organ.organId != ''">
+                o.organId = #{organ.organId}
+            </if>
+            <if test="schedulingType != null and schedulingType !=''">
+                and schedulingType = #{schedulingType}
+            </if>
+            <if test="dept.deptNo != null and dept.deptNo != ''">
+                and d.deptNo = #{dept.deptNo}
+            </if>
+            <if test="doctor.dId != null and doctor.dId != ''">
+                and d2.did = #{doctor.dId}
+            </if>
+            <if test="numClass != null and numClass != ''">
+                and numClass = #{numClass}
+            </if>
+            <if test="numType != null and numType != ''">
+                and numType = #{numType}
+            </if>
+            <if test="classes != null and classes != ''">
+                and classes = #{classes}
+            </if>
+            <if test="isHoliday != null and isHoliday != ''">
+                and isHoliday = #{isHoliday}
+            </if>
+            <if test="useful != null and useful != ''">
+                and useful = #{useful}
+            </if>
+            <if test="week != null and week != ''">
+                and week = #{week}
+            </if>
+        </where>
+    </select>
+
+    <delete id="delete">
+        delete
+        from scheduling
+        where schedulingid in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <insert id="insert" parameterType="Scheduling">
+        insert into scheduling (schedulingtype, organid, deptno, did, numclass, numtype, week, classes,
+                                timecode, sjdhys, addnumable, isholiday, numwindow, useful, timetemplateid)
+        values (#{schedulingType}, #{organ.organId}, #{dept.deptNo}, #{doctor.dId}, #{numClass}, #{numType}, #{week},
+                #{classes}, #{timeCode}, #{sjdhys}, #{addNumAble}, #{isHoliday}, #{numWindow}, #{useful},
+                #{timeTemplateId})
+    </insert>
+
+    <select id="selectByScheduling" resultMap="select">
+        select schedulingid,
+        schedulingtype,
+        o.organid,
+        o.organName,
+        d.deptno,
+        d.deptName,
+        d2.did,
+        d2.dname,
+        numclass,
+        numtype,
+        week,
+        classes,
+        timecode,
+        sjdhys,
+        addnumable,
+        isholiday,
+        numwindow,
+        useful,
+        timetemplateid
+        from scheduling
+        left join organ o on o.organId = scheduling.organid
+        left join dept d on d.deptNo = scheduling.deptno
+        left join doctor d2 on d2.did = scheduling.did
+        <where>
+            <if test="scheduling.organ.organId != null">
+                o.organid = #{scheduling.organ.organId}
+            </if>
+            <if test="scheduling.dept.deptNo != null">
+                and d.deptno = #{scheduling.dept.deptNo}
+            </if>
+            <if test="scheduling.doctor.dId != null">
+                and d2.did = #{scheduling.doctor.dId}
+            </if>
+            <if test="belong != null">
+                and schedulingtype = #{belong}
+            </if>
+            <if test="week != null">
+                and week = #{week}
+            </if>
+            <if test="classes != null">
+                and classes = #{classes}
+            </if>
+            <if test="useful != null">
+                and useful = #{useful}
+            </if>
+        </where>
+    </select>
+
+    <update id="update" parameterType="Scheduling">
+        update scheduling
+        set schedulingtype = #{schedulingType},
+            organid        = #{organ.organId},
+            deptno         = #{dept.deptNo},
+            did            = #{doctor.dId},
+            numclass       = #{numClass},
+            numtype        = #{numType},
+            week           = #{week},
+            classes        = #{classes},
+            timecode       = #{timeCode},
+            sjdhys         = #{sjdhys},
+            addnumable     = #{addNumAble},
+            isHoliday      = #{isHoliday},
+            numwindow      = #{numWindow},
+            useful         = #{useful},
+            timeTemplateId = #{timeTemplateId}
+        where schedulingId = #{schedulingId}
+    </update>
+
+</mapper>
